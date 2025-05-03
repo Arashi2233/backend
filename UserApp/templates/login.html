@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.min.css' %}">
+    <style>
+        .login-box {
+            width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid #dddddd;
+            margin-top: 220px;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 20px
+        }
+
+        .login-box h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>用户登录</h2>
+    <form method="post" action="/login/" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+            <label>{{ form.name.label }}</label>
+            {{ form.name }}
+            <span style="color: red;">{{ form.name.errors.0 }}</span>
+        </div>
+        <div class="form-group">
+            <label>{{ form.pwd.label }}</label>
+            {{ form.pwd }}
+            <span style="color: red;">{{ form.pwd.errors.0 }}</span>
+        </div>
+        <div class="form-group">
+            <label>{{ form.code.label }}</label>
+            <div class="row">
+                <div class="col-xs-6">
+                    {{ form.code }}
+                </div>
+                <div class="col-xs-6">
+                    <img src="/img/code/" id="codeImage"/>
+                </div>
+            </div>
+            <span style="color: red;">{{ form.code.errors.0 }}</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">提 交</button>
+        <span style="color: red;">{{ error }}</span>
+    </form>
+</div>
+
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+<script>
+    $(function () {
+        $("#codeImage").click(function () {
+            var url = $(this).attr('src');  // "/img/code/?"
+            $(this).attr('src', url + "?");
+        });
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <div style="margin-bottom: 10px">
+        <a href="/add/depart/" class="btn btn-success">新建部门</a>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>名称</th>
+            <th>人数</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in queryset %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.title }}</td>
+                <td>{{ row.count }}</td>
+                <td>
+                    <a href="/delete/depart/?did={{ row.id }}">删除</a>
+                    <a href="/edit/depart/?did={{ row.id }}">编辑</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

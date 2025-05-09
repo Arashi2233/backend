@@ -28,6 +28,31 @@ def plot_comparison(data, forecast):
     plt.title('Forecast-Actual-Prophet')
     plt.savefig('plot_Prophet.png')
 
+def DataGet(request):
+    try:
+        # 读取csv的最后100个数据
+        data = pd.read_csv('data.csv').tail(100)
+        data.columns = ['ds', 'y']
+        print(data, type(data))
+        data['ds'] = pd.to_datetime(data['ds'])
+
+        # 原来的代码
+        date=data['ds'].tolist()
+        data.set_index('ds', inplace=True)
+        sales = data['y'].tolist()
+        # date即为日期戳
+        print(date)
+        print(data)
+        print(sales)
+
+        context = {
+            'date': date,
+            'yhat': sales
+        }
+        return JsonResponse({'code': 200, 'msg': '获取csv成功', 'context': context}, safe=False)
+    except:
+        return JsonResponse({'code': -999, 'msg': '获取csv失败'}, safe=False)
+    
 
 # params:{ model: ... , }
 def TimePredict(request):
@@ -38,6 +63,11 @@ def TimePredict(request):
         # 选择的预测模型 model
         model = request.GET['model']
         print(model)
+        
+        # data = request.GET['data']
+        # date = request.GET['date']
+        
+
 
         # 读取csv文件 规定csv文件只有列[date, val] -> [ds, y], 并对 ds 列日期格式转化
         data = pd.read_csv('data.csv')
@@ -72,23 +102,33 @@ def TimePredict(request):
 
         elif model == 'ARIMA':
             print('arima')
+            p = request.GET['p']
+            d = request.GET['d']
+            q = request.GET['q']
+            length = request.GET['length']
             # 将数据格式转化为ARIMA需要的格式
+
+            # 原来的代码
+            date=data['ds'].tolist()
             data.set_index('ds', inplace=True)
             sales = data['y'].tolist()
-            # print(data)
+            # date即为日期戳
+            print(date)
+            print(data)
             print(sales)
 
             # 手动构建ARIMA模型 模型参数选取 (训练数据, order=(p,d,q))
-            # Amodel = sm.tsa.arima.ARIMA(sales, order=(1, 1, 1))
+            Amodel = sm.tsa.arima.ARIMA(data, order=(int(p), int(d), int(q)))
 
             # 使用auto_arima函数自动选择最优的order参数
             # seasonal: 是否考虑季节性；
             # suppress_warnings: 是否禁止显示警告信息
-            Amodel = auto_arima(sales, seasonal=True, suppress_warnings=True)
+            # Amodel = auto_arima(sales, seasonal=True, suppress_warnings=True)
             # 打印选择的p、d、q参数
             print("Selected p,d,q parameters:", Amodel.order)
             # 根据选择的order参数构建ARIMA模型
-            Amodel_fit = Amodel.fit(y=sales)
+            Amodel_fit = Amodel.fit()
+            # Amodel_fit = Amodel.fit(y=sales)
 
             # 绘制ACF图
             plot_acf(Amodel_fit.resid)
@@ -98,15 +138,15 @@ def TimePredict(request):
             plt.savefig('plot2.png')
 
             # 绘制PACF图
-            plot_pacf(Amodel_fit.resid)
+            plot_pacf(data['y'])
             plt.xlabel('Lag')
             plt.ylabel('PACF')
             plt.title('Partial Autocorrelation Function (PACF)')
             plt.savefig('plot1.png')
 
             # 进行预测(未来30天)
-            # forecast = Amodel_fit.forecast(steps=30)
-            forecast = Amodel_fit.predict(n_periods=60)
+            forecast = Amodel_fit.forecast(steps=int(length))
+            # forecast = Amodel_fit.predict(n_periods=int(length))
             # 输出预测结果
             print(forecast,len(forecast))
 
@@ -115,25 +155,27 @@ def TimePredict(request):
             start_date = data.index[-1]
             print(start_date)
 
-            future_dates = pd.date_range(start=start_date, periods=60, freq='D')
+            future_dates = pd.date_range(start=start_date, periods=int(length), freq='D')
+            print(future_dates.tolist())
             context = {
                 'date': future_dates.tolist(),
                 'yhat': forecast.tolist()
             }
 
             # 将真实值和预测值绘制在一起
-            plt.figure(figsize=(10, 6))
-            plt.plot(data.index, data['y'], label='Actual')
-            plt.plot(future_dates, forecast, label='Forecast', color='red')
-            plt.xlabel('Date')
-            plt.ylabel('Sales')
-            plt.title('Actual vs Forecast')
-            plt.legend()
-            plt.savefig('plot_ARIMA.png')
+            # plt.figure(figsize=(10, 6))
+            # plt.plot(data.index, data['y'], label='Actual')
+            # plt.plot(future_dates, forecast, label='Forecast', color='red')
+            # plt.xlabel('Date')
+            # plt.ylabel('Sales')
+            # plt.title('Actual vs Forecast')
+            # plt.legend()
+            # plt.savefig('plot_ARIMA.png')
 
             return JsonResponse({'code': 200, 'msg': '获取csv成功', 'context': context}, safe=False)
     except:
         return JsonResponse({'code': -999, 'msg': '获取csv失败'}, safe=False)
+
 
 
 @csrf_exempt

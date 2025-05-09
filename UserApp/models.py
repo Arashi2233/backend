@@ -62,6 +62,8 @@ class OrderList(models.Model):
     order_good = models.ForeignKey(to=GoodList, related_name='good_order', on_delete=models.CASCADE,
                                    blank=True, null=True,
                                    verbose_name='订购商品')  # models.CASCADE: 级联删除,删除关联对象时同时删除本对象。
+    number = models.IntegerField(default=1)  # 订购商品数量
+    
 
 
 # 工位对应（A、B、C、D）只设置四个加工设备

@@ -1,5 +1,5 @@
 from django.urls import path, re_path
-from UserApp.views import log_views, department, mytestview, mystudyview, user_views, pic_views, goods_views, order_views, equip_views, algorithm_views
+from UserApp.views import log_views, department, mytestview, mystudyview, user_views, pic_views, goods_views, order_views, equip_views, algorithm_views, chart_views
 
 
 
@@ -43,6 +43,10 @@ urlpatterns = [
                   # 算法
                   path('algorithm/timePredict/', algorithm_views.TimePredict),
                   path('algorithm/agvSchedule/', algorithm_views.AgvSchedule),
+                  path('algorithm/dataGet/', algorithm_views.DataGet),
+
+                  # 图表
+                  path('chart/', chart_views.charts_data),
 
 
                   

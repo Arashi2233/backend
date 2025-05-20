@@ -26,6 +26,9 @@ class UserList(models.Model):
     pwd = models.CharField(max_length=500)
     head_img = models.CharField(max_length=500, null=True)  # 头像，图片需要上传到后端，和goods_pic一样
     role = models.IntegerField(choices=roles,default=0)  # 默认为客户
+    @property
+    def order_count(self):
+        return self.user_order.count()
 
 class GoodList(models.Model):
     # choices = (

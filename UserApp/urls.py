@@ -1,5 +1,5 @@
 from django.urls import path, re_path
-from UserApp.views import log_views, department, mytestview, mystudyview, user_views, pic_views, goods_views, order_views, equip_views, algorithm_views, chart_views
+from UserApp.views import log_views, department, mytestview, mystudyview, user_views, pic_views, goods_views, order_views, equip_views, algorithm_views, chart_views, pwd_views
 
 
 
@@ -13,6 +13,9 @@ urlpatterns = [
                   path('user/addUser/', user_views.addUserView.as_view()),
                   path('user/editUser/', user_views.editUserView.as_view()),
                   path('user/delUser/', user_views.delUserView.as_view()),
+
+                  # 密码
+                  path('pwd/editPwd/', pwd_views.EditPwdView.as_view()),
 
                   # 用户登录
                   path('login/', log_views.login),

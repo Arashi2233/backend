@@ -4,6 +4,7 @@ from UserApp.models import UserList, GoodList, OrderList, EquipList, Department
 
 # 用户信息序列化器
 class UserListSerializer(serializers.ModelSerializer):
+    order_count = serializers.IntegerField(read_only=True)
     class Meta:
         model = UserList
         fields = '__all__'

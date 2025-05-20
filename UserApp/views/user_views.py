@@ -99,7 +99,7 @@ class editUserView(APIView):
         # 获取对应用户obj
         user = UserList.objects.get(id=users_data['id'])
         # instance 修改前数据
-        users_serializer = UserListSerializer(instance=user, data=users_data)
+        users_serializer = UserListSerializer(instance=user, data=users_data)# partial=True只传要改的字段即可，未传的字段保持原值。
         if users_serializer.is_valid():
             users_serializer.save()
             dataset = {

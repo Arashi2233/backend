@@ -12,6 +12,7 @@ from UserApp.serializers import UserListSerializer
 
 from django.core.files.storage import default_storage
 from django.utils import timezone
+import datetime
 from django.db.models import Sum,Case, When, Value, IntegerField, Count
 from collections import defaultdict
 
@@ -19,11 +20,23 @@ from collections import defaultdict
 
 def charts_data(request):
     try:
-        today = timezone.localdate()  # 获取当前时区的日期
-        today_orders_count = OrderList.objects.filter(create_time__date=today).count()
-        # 对查询结果进行聚合运算（如求和、平均值等），返回一个字典,Sum('number')：表示对 number 字段求和，total 是自定义的结果键名。
-        total_number = OrderList.objects.filter(create_time__date=timezone.localdate()).aggregate(total=Sum('number'))['total'] 
-        total_number = total_number or 0
+        # 获取上海时间的当日日期
+        local_today = timezone.localtime().date()  # 当前上海日期，如 2023-10-10
+
+        # 生成上海时间的当日开始和结束时间（需转换为 UTC 时间）
+        local_start = timezone.make_aware(datetime.datetime.combine(local_today, datetime.time.min))  # 上海时间 00:00:00
+        local_end = local_start + datetime.timedelta(days=1)  # 上海时间次日 00:00:00
+
+        # 查询当天的订单
+        today_orders_count = OrderList.objects.filter(
+            create_time__gte=local_start,
+            create_time__lt=local_end
+        ).count()
+
+        total_number = OrderList.objects.filter(
+            create_time__gte=local_start,
+            create_time__lt=local_end
+        ).aggregate(total=Sum('number'))['total'] or 0
         raw_orders_count = OrderList.objects.filter(status=0).count()
         raw_orders_count = raw_orders_count or 0
         # 定义区间条件并统计各商品数量区间内订单数量

@@ -2,9 +2,33 @@ import os
 from django.http.response import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
+from django.conf import settings
 from faker import Faker
 
-
+@csrf_exempt
+def GetPic(request):
+    filename = request.GET.get('file_name')
+    # 安全处理文件名
+    safe_filename = os.path.basename(filename)
+    
+    # 组合完整存储路径（与你的delete逻辑一致）
+    file_path = os.path.join(settings.MEDIA_ROOT, safe_filename)
+    
+    # 检查文件是否存在
+    if not os.path.exists(file_path):
+        return JsonResponse({'code': 404, 'message': '图片不存在'}, status=404)
+    
+    try:
+        # 二进制读取模式打开
+        with open(file_path, 'rb') as f:
+            return HttpResponse(f.read(), content_type="image/png")
+    
+    except Exception as e:
+        return JsonResponse(
+            {'code': 500, 'message': f'图片读取失败: {str(e)}'},
+            status=500
+        )
+    
 @csrf_exempt
 def UploadPic(request):
     file = request.FILES['file']

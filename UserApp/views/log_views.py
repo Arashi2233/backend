@@ -54,7 +54,7 @@ def login(request):
     if not user_object:
         return JsonResponse({'code': -999, 'message': '用户名或密码错误'}, safe=False)
 
-    return JsonResponse({'code': 200, 'message': '登录成功', 'user_id': user_object.id}, safe=False)
+    return JsonResponse({'code': 200, 'message': '登录成功', 'user_id': user_object.id, 'head_img': user_object.head_img}, safe=False)
     
 @csrf_exempt
 def img_code(request):

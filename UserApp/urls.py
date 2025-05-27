@@ -23,6 +23,7 @@ urlpatterns = [
                   path('img/code/', log_views.img_code),
 
                   # 图片
+                  re_path(r'^pic/getPic/', pic_views.GetPic),
                   re_path(r'^pic/uploadPic/', pic_views.UploadPic),
                   re_path(r'^pic/deletePic/', pic_views.DeletePic),
 

@@ -41,14 +41,12 @@ class getUserView(APIView):
     # }
     @csrf_exempt
     def get(self, request):
-
-        if not request.GET.get('name'):
-            users_list = UserList.objects.all().order_by('id')
+        if 'name' in request.GET:
+            users_list = UserList.objects.filter(name=request.GET['name']).order_by('id')
+        elif 'role' in request.GET:
+            users_list = UserList.objects.filter(role=request.GET['role']).order_by('id')
         else:
-            user_name = request.GET['name']
-            users_list = UserList.objects.filter(name=user_name).order_by('id')  # 此处只有一个对象
-            # print(user_name)  # str
-
+            users_list = UserList.objects.all().order_by('id')
         # 第二步:实力化产生一个分页类对象,不需要传参数
         page_pagination = PageNumberPagination()
         # 接收分页4个参数

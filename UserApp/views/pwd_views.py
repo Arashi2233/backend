@@ -11,7 +11,7 @@ from UserApp.serializers import UserListSerializer
 # CBV类视图
 from rest_framework.views import APIView
 # 辅助函数
-from utils.encrypt import md5
+from djutils.encrypt import md5
 
 
 # 修改密码需要验证原密码

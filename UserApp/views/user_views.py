@@ -8,7 +8,7 @@ from django.core.validators import RegexValidator
 from io import BytesIO
 
 # 辅助函数
-from utils.encrypt import md5
+from djutils.encrypt import md5
 
 # 解决url中文乱码
 import urllib.parse

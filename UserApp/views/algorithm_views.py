@@ -1,5 +1,10 @@
 import pandas as pd
-
+import os
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 import matplotlib.pyplot as plt
 
 plt.switch_backend('agg')  # 切换到Agg后端
@@ -18,8 +23,6 @@ from pmdarima import auto_arima
 
 import subprocess
 from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
-from django.http.response import JsonResponse
 
 
 def plot_comparison(data, forecast):
@@ -194,3 +197,57 @@ def AgvSchedule(request):
     print(result.stdout)
     # 返回执行结果
     return JsonResponse({'stdout': result.stdout, 'stderr': result.stderr})
+
+from djutils.yolomodel import run_inference
+@csrf_exempt
+def DefectDetection(request):
+    """
+    接收前端 POST 上传的一张图片（字段名 'image')
+    保存到 MEDIA_ROOT/inference_input/ 下做推理，
+    最后返回 JSON: { detections: [...], annotated_image_url: '...' }
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': '仅支持 POST 方法'}, status=405)
+
+    image_file = request.FILES.get('image', None)
+    if image_file is None:
+        return JsonResponse({'error': '请上传图片，字段名为 image'}, status=400)
+
+    # ---------- 1. 将上传文件临时保存到 MEDIA_ROOT/inference_input/ ----------
+    input_dir = os.path.join(settings.MEDIA_ROOT, 'inference_input')
+    os.makedirs(input_dir, exist_ok=True)
+
+    # default_storage 在 Windows 上会默认像相对 MEDIA_ROOT 保存
+    saved_path = default_storage.save(f"inference_input/{image_file.name}", ContentFile(image_file.read()))
+    # saved_path 例如 "inference_input/img1.png"
+    abs_input_path = os.path.join(settings.MEDIA_ROOT, saved_path)
+
+    # ---------- 2. 调用 run_inference 做推理 ----------
+    try:
+        result = run_inference(abs_input_path)
+    except Exception as e:
+        # 推理出错时清理上传的临时文件，再返回错误
+        default_storage.delete(saved_path)
+        return JsonResponse({'error': f'推理出错：{str(e)}'}, status=500)
+
+    # 3. 删除临时上传文件（如果你不需要保留原图）
+    default_storage.delete(saved_path)
+
+    # 4. 拼接带框图的 URL： MEDIA_URL + relative_path
+    #    settings.MEDIA_URL = '/Photos/'
+    #    annotated_image_rel_path 例如 'inference_results/result_img1.jpg'
+    abs_out_path = result['annotated_image_path']  
+    # abs_out_path 形如 "F:/.../Photos/inference_results/result_xxx.jpg"
+
+    # 先把它变成相对于 MEDIA_ROOT 的路径
+    rel_path = os.path.relpath(abs_out_path, settings.MEDIA_ROOT).replace('\\', '/')
+    # rel_path 现在是 "inference_results/result_xxx.jpg"
+
+    annotated_url = request.build_absolute_uri(settings.MEDIA_URL + rel_path)
+
+    # ---------- 5. 返回 JSON ----------
+    return JsonResponse({
+        'status': 'success',
+        'detections': result['detections'],
+        'annotated_image_url': annotated_url
+    })

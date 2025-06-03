@@ -6,8 +6,8 @@ import json
 from io import BytesIO
 
 # 辅助函数
-from utils.encrypt import md5
-from utils.helper import check_code
+from djutils.encrypt import md5
+from djutils.helper import check_code
 
 # 解决url中文乱码
 import urllib.parse

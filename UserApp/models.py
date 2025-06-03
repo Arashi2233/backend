@@ -34,6 +34,9 @@ class GoodList(models.Model):
     # choices = (
     #     (1, 'cart'), (0, 'order')
     # )
+    choices = (
+        (1, '智能小车'), (2, '摄像头'), (3, '传感器'), (4, '标准件'), (5, '定制件'), (0, '其他')
+    )   
     goods_id = models.AutoField(primary_key=True)
     goods_name = models.CharField(max_length=500)
     goods_number = models.IntegerField(default=3)  # 创建的该商品数量
@@ -41,6 +44,7 @@ class GoodList(models.Model):
     goods_introduce = models.CharField(max_length=500, default='商品介绍')
     goods_pic = models.CharField(max_length=500, default='1.png')  # 只允许存放一张图片的名字
     goods_stockNum = models.IntegerField(default=50)  # 该类商品库存数量
+    goods_category = models.IntegerField(default=0,choices=choices)  # 商品分类，默认为1
     # 判断是否已经下单，已经下单的商品不会放在购物车，而是订单列表，此字段只对客户有意义
     # status = models.IntegerField(choices=choices, default=1)
 

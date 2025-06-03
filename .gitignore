@@ -1,3 +1,7 @@
 *.pyc
 *.png
+*.jpg
+*.jpeg
+*.txt
 /mytestvue/
+/yolov5/

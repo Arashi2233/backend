@@ -108,7 +108,7 @@ class AddOrderView(APIView):
         print(buyer_id)
         order_good_id = request.GET['order_good_id']
         print(order_good_id)
-        OrderList.objects.create(status=0, buyer_id=buyer_id,order_name=generate_random_name(),order_good_id=order_good_id)
+        OrderList.objects.create(status=0, buyer_id=buyer_id, order_name=generate_random_name(), order_good_id=order_good_id)
         return JsonResponse({'code': 200, 'message': '添加订单成功'}, safe=False)
 
 
